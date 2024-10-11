@@ -1,26 +1,41 @@
-import tkinter as tk
+from flask import Flask
 import random
 import string
+
 def password_generator(length):
-    characters = string.ascii_letters+string.digits+string.punctuation
-    password = random.choice(string.ascii_letters) + ''.join(random.choice(characters) for i in range(length - 1)) 
-    return password
+    
+    lowercase = string.ascii_lowercase
+    uppercase =string.ascii_uppercase
+    digits = string.digits
+    special_chars = "@#$"
+    all_chars = lowercase+uppercase+digits+special_chars
+    password = [
+        random.choice(lowercase),
+        random.choice(uppercase),
+        random.choice(digits),
+        random.choice(special_chars),
+    ]
+     # Fill remaining length with random characters
+    for _ in range(length - 4):
+        password.append(random.choice(all_chars))
+ 
+    # Shuffle list to avoid first characters always being in same character set
+    random.shuffle(password)
+ 
+    return "".join(password)
 
-root = tk.Tk()
-root.title('Random Password Generator!')
-root.geometry("300x300")
+app = Flask(__name__)
 
-label = []
-
-def generate_password():
-    if len(label) > 0:
-        label[0].destroy()
-        label.pop()
-
-    label.append(tk.Label(root, text=password_generator(6)))
-    label[0].pack()
-
-button = tk.Button(root, text='Generate Password', command=generate_password)
-button.pack()
-
-root.mainloop()
+@app.route("/")
+def main():
+    while True:
+        length = int(input("Enter password length (10-16): "))
+        if 10 <= length <= 16:
+            password = password_generator(length)
+            print("Generated Password : ", password)
+            break
+        else:
+            print("Password length must be between 10 and 16. Please try again.")
+ 
+if __name__ == '__main__':
+    app.run()
